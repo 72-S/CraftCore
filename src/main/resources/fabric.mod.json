@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "craftcore",
+  "version": "${version}",
+  "name": "CraftCore",
+  "description": "",
+  "authors": [],
+  "contact": {
+    "repo": "https://github.com/consti/CraftCore"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/craftcore/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "org.craftcore.craftcore.client.CraftCoreClient"
+    ],
+    "main": [
+      "org.craftcore.craftcore.CraftCore"
+    ]
+  },
+  "mixins": [
+    "craftcore.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
