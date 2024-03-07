@@ -4,12 +4,12 @@
   "version": "${version}",
   "name": "CraftCore",
   "description": "",
-  "authors": [],
+  "authors": ["72S"],
   "contact": {
     "repo": "https://github.com/consti/CraftCore"
   },
   "license": "All-Rights-Reserved",
-  "icon": "assets/craftcore/icon.png",
+  "icon": "../assets/icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
@@ -26,5 +26,6 @@
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
     "minecraft": "${minecraft_version}"
-  }
+  },
+  "accessWidener": "access.accesswidener"
 }

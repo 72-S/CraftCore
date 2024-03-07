@@ -1,0 +1,4 @@
+accessWidener    v1    named
+accessible    class    net/minecraft/command/argument/BlockArgumentParser
+accessible    method    net/minecraft/command/argument/BlockArgumentParser <init>(Lnet/minecraft/util/registry/Registry;Lcom/mojang/brigadier/StringReader;Z)V
+accessible method net/minecraft/command/argument/BlockArgumentParser parse ()V
