@@ -2,20 +2,14 @@ package org.craftcore.craftcore.commands;
 
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.BlockArgumentParser;
-import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Position;
 import net.sandrohc.schematic4j.SchematicLoader;
@@ -25,14 +19,13 @@ import net.sandrohc.schematic4j.schematic.types.SchematicBlock;
 import net.sandrohc.schematic4j.schematic.types.SchematicBlockPos;
 import org.craftcore.craftcore.core.BlockPlacer;
 import org.craftcore.craftcore.core.ShematicManager;
-import net.minecraft.registry.Registry;
+import org.craftcore.craftcore.core.StringToBlockParser;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static jdk.javadoc.internal.doclets.formats.html.markup.HtmlStyle.block;
 
 public class Load {
   public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -48,16 +41,7 @@ public class Load {
                     )
     );
 }
-    private static BlockState stringToBlockState(String blockName) {
-        StringReader reader = new StringReader(blockName);
-        BlockArgumentParser parser = new BlockArgumentParser(Registry.register(BlockArgumentParser), reader, false);
-        try {
-            parser.parse();
-        } catch (CommandSyntaxException e) {
-            e.printStackTrace();
-    }
-        return null;
-    }
+
     private static int execute(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         String schematicName = StringArgumentType.getString(context, "schematicName");
@@ -81,8 +65,12 @@ public class Load {
                 Position playerPosition = source.getPosition();
 
                 String blockName = block.name();
-                blockPlacer.handleBlock(source.getWorld(), stringToBlockState(blockName), blockPos, playerPosition);
-            });
+                    try {
+                        blockPlacer.handleBlock(source.getWorld(), StringToBlockParser.parseBlock(), blockPos, playerPosition);
+                    } catch (CommandSyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
 
             } catch (ParsingException | IOException e) {
                 source.sendError(Text.literal("Failed to load schematic: " + e.getMessage()));
@@ -94,5 +82,6 @@ public class Load {
         }
         return 0;
     }
+
 
 }
