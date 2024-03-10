@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CraftCore.iml" filepath="$PROJECT_DIR$/.idea/modules/CraftCore.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/CraftCore.main.iml" filepath="$PROJECT_DIR$/.idea/modules/CraftCore.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/CraftCore.test.iml" filepath="$PROJECT_DIR$/.idea/modules/CraftCore.test.iml" />
     </modules>

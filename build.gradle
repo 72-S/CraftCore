@@ -10,11 +10,12 @@ base {
     archivesName = project.archives_base_name
 }
 
+loom {
+    accessWidenerPath = file('src/main/resources/craftcore.accesswidener')
+}
 repositories {
     mavenCentral()
-    maven {
-        url "https://maven.enginehub.org/repo/"
-    }
+    maven {url "https://maven.enginehub.org/repo/" }
     maven { url 'https://jitpack.io' }
 }
 
@@ -26,8 +27,9 @@ dependencies {
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    // https://mvnrepository.com/artifact/com.sk89q.worldedit/worldedit-fabric-mc1.20.4
     implementation 'net.sandrohc:schematic4j:1.1.0'
+    implementation 'com.github.Querz:NBT:6.1'
+
 }
 
 processResources {
@@ -42,6 +44,8 @@ processResources {
                 "loader_version": project.loader_version
     }
 }
+
+
 
 def targetJavaVersion = 17
 tasks.withType(JavaCompile).configureEach {
@@ -65,6 +69,8 @@ java {
     // If you remove this line, sources will not be generated.
     withSourcesJar()
 }
+
+
 
 jar {
     from("LICENSE") {
