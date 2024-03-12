@@ -7,8 +7,7 @@ import net.minecraft.util.math.Position;
 import org.craftcore.craftcore.CraftCore;
 
 public class BlockPlacer {
-  public static void handleBlock(
-      ServerWorld world, BlockState blockName, BlockPos blockPos, Position position) {
+  public static void handleBlock(ServerWorld world, BlockState blockName, BlockPos blockPos, Position position) {
     CraftCore.LOGGER.info(
         "Block: "
             + blockName

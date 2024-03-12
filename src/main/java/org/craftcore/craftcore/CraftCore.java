@@ -2,6 +2,7 @@ package org.craftcore.craftcore;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import org.craftcore.craftcore.commands.GetSchematics;
 import org.craftcore.craftcore.commands.LoadShem;
 import org.craftcore.craftcore.core.shematic.SchematicManager;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ public class CraftCore implements ModInitializer {
     private void registerCommands() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, isEarly) -> {
             LoadShem.register(dispatcher);
+            GetSchematics.register(dispatcher);
         });
     }
 }
