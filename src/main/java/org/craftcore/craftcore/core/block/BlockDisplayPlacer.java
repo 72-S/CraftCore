@@ -1,6 +1,8 @@
 package org.craftcore.craftcore.core.block;
 
 import java.util.Map;
+import java.util.UUID;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
@@ -13,7 +15,7 @@ import net.minecraft.util.math.Position;
 import org.craftcore.craftcore.CraftCore;
 
 public class BlockDisplayPlacer {
-  public static void handleBlock(ServerWorld world, BlockState blockState, BlockPos blockPos, Position position) {
+  public static void handleBlock(ServerWorld world, BlockState blockState, BlockPos blockPos, Position position, UUID uuid) {
     int newX = (int) (blockPos.getX() + position.getX());
     int newY = (int) (blockPos.getY() + position.getY());
     int newZ = (int) (blockPos.getZ() + position.getZ());
@@ -26,7 +28,6 @@ public class BlockDisplayPlacer {
         Comparable<?> value = entry.getValue();
         blockProperties.putString(property.getName(), propertyAsString(property, value));
     }
-      CraftCore.LOGGER.info("Block Properties: " + blockProperties);
     blockStateTag.put("Properties", blockProperties);
     NbtCompound entityData = new NbtCompound();
     entityData.put("block_state", blockStateTag);
@@ -35,6 +36,7 @@ public class BlockDisplayPlacer {
 
           entity.readNbt(entityData);
           entity.setPos(newX, newY, newZ);
+          entity.addCommandTag(uuid.toString());
           world.spawnEntity(entity);
       }
 

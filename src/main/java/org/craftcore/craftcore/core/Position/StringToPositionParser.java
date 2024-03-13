@@ -13,17 +13,17 @@ public class StringToPositionParser {
         return new Position() {
             @Override
             public double getX() {
-                return 0;
+                return x;
             }
 
             @Override
             public double getY() {
-                return 0;
+                return y;
             }
 
             @Override
             public double getZ() {
-                return 0;
+                return z;
             }
         };
     }

@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
+import java.util.UUID;
+
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandSource;
@@ -27,6 +30,7 @@ import org.craftcore.craftcore.core.block.BlockPlacer;
 import org.craftcore.craftcore.core.shematic.SchematicManager;
 
 public class LoadSchematic {
+    private static Boolean Type = false;
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(
                 CommandManager.literal("load")
@@ -55,7 +59,7 @@ public class LoadSchematic {
 
     @FunctionalInterface
     interface BlockHandler {
-        void handle(ServerWorld source, BlockState blockState, BlockPos blockPos, Position playerPosition);
+        void handle(ServerWorld source, BlockState blockState, BlockPos blockPos, Position playerPosition, UUID id);
     }
 
 
@@ -71,7 +75,7 @@ public class LoadSchematic {
         if (Files.exists(fullPath)) {
             try {
                 Schematic schematic = SchematicLoader.load(fullPath);
-                SchematicManager.saveSchematicId(source.getPosition(), schematicName, fullFileName, schematicName+".test");
+                SchematicManager.saveSchematicId(source.getPosition(), schematicName, fullFileName, schematicName+".test", Type);
                 source.sendFeedback(() -> Text.literal("Schematic loaded: " + schematicName), false);
                 source.sendFeedback(() -> Text.literal("Schematic size: " + schematic.length()), false);
                 schematic.blocks().forEach(pair -> {
@@ -81,7 +85,12 @@ public class LoadSchematic {
                     Position playerPosition = source.getPosition();
                     String blockName = block.name();
                     BlockState blockState = BlockParser.parseBlockState(blockName);
-                    handler.handle(source.getWorld(), blockState, blockPos, playerPosition);
+                    UUID id = Objects.requireNonNull(SchematicManager.schematicInfos.values().stream()
+                            .filter(info -> info.fullFileName.equals(fullFileName))
+                            .findFirst()
+                            .orElse(null)).id;
+
+                    handler.handle(source.getWorld(), blockState, blockPos, playerPosition, id);
                 });
             } catch (ParsingException | IOException e) {
                 source.sendError(Text.literal("Failed to load schematic: " + e.getMessage()));
@@ -96,10 +105,12 @@ public class LoadSchematic {
 
 
     private static int executeBlock(CommandContext<ServerCommandSource> context) {
+        Type = true;
         return executeWithHandler(context, BlockPlacer::handleBlock);
     }
 
     private static int executeBlockDisplay(CommandContext<ServerCommandSource> context) {
+        Type = false;
         return executeWithHandler(context, BlockDisplayPlacer::handleBlock);
     }
 
