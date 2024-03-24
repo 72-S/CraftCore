@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.UUID;
-
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandSource;
@@ -30,88 +29,114 @@ import org.craftcore.craftcore.core.block.BlockPlacer;
 import org.craftcore.craftcore.core.shematic.SchematicManager;
 
 public class LoadSchematic {
-    private static Boolean Type = false;
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(
-                CommandManager.literal("load")
-                        .then(
-                                CommandManager.argument("schematicName", StringArgumentType.string())
-                                        .then(
-                                                CommandManager.argument("exampleChoice", StringArgumentType.string())
-                                                        .suggests((context, builder) -> CommandSource.suggestMatching(
-                                                                new String[] {"schem", "schematic", "litematic"}, builder))
-                                                        .then(
-                                                                CommandManager.argument("blockType", StringArgumentType.string())
-                                                                        .suggests((context, builder) -> CommandSource.suggestMatching(
-                                                                                new String[] {"block", "blockdisplay"}, builder))
-                                                                        .executes(context -> {
-                                                                            String blockType = StringArgumentType.getString(context, "blockType");
-                                                                            if ("block".equals(blockType)) {
-                                                                                return executeBlock(context);
-                                                                            } else if ("blockdisplay".equals(blockType)) {
-                                                                                return executeBlockDisplay(context);
-                                                                            } else {
-                                                                                context.getSource().sendError(Text.literal("Invalid block type!"));
-                                                                                return 0;
-                                                                            }
-                                                                        })))));
-    }
+  private static Boolean Type = false;
 
-    @FunctionalInterface
-    interface BlockHandler {
-        void handle(ServerWorld source, BlockState blockState, BlockPos blockPos, Position playerPosition, UUID id);
-    }
+  public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    dispatcher.register(
+        CommandManager.literal("load")
+            .then(
+                CommandManager.argument("schematicName", StringArgumentType.string())
+                    .then(
+                        CommandManager.argument("exampleChoice", StringArgumentType.string())
+                            .suggests(
+                                (context, builder) ->
+                                    CommandSource.suggestMatching(
+                                        new String[] {"schem", "schematic", "litematic"}, builder))
+                            .then(
+                                CommandManager.argument("blockType", StringArgumentType.string())
+                                    .suggests(
+                                        (context, builder) ->
+                                            CommandSource.suggestMatching(
+                                                new String[] {"block", "blockdisplay"}, builder))
+                                    .executes(
+                                        context -> {
+                                          String blockType =
+                                              StringArgumentType.getString(context, "blockType");
+                                          if ("block".equals(blockType)) {
+                                            return executeBlock(context);
+                                          } else if ("blockdisplay".equals(blockType)) {
+                                            return executeBlockDisplay(context);
+                                          } else {
+                                            context
+                                                .getSource()
+                                                .sendError(Text.literal("Invalid block type!"));
+                                            return 0;
+                                          }
+                                        })))));
+  }
 
+  private static int executeWithHandler(
+      CommandContext<ServerCommandSource> context, BlockHandler handler) {
+    ServerCommandSource source = context.getSource();
+    String schematicName = StringArgumentType.getString(context, "schematicName");
+    String fileType = StringArgumentType.getString(context, "exampleChoice");
 
-    private static int executeWithHandler(CommandContext<ServerCommandSource> context, BlockHandler handler) {
-        ServerCommandSource source = context.getSource();
-        String schematicName = StringArgumentType.getString(context, "schematicName");
-        String fileType = StringArgumentType.getString(context, "exampleChoice");
+    String fullFileName = schematicName + "." + fileType;
+    Path schematicPath = Paths.get(SchematicManager.SCHEMATIC_FOLDER_NAME, fullFileName);
+    Path fullPath = FabricLoader.getInstance().getGameDir().resolve(schematicPath);
 
-        String fullFileName = schematicName + "." + fileType;
-        Path schematicPath = Paths.get(SchematicManager.SCHEMATIC_FOLDER_NAME, fullFileName);
-        Path fullPath = FabricLoader.getInstance().getGameDir().resolve(schematicPath);
+    if (Files.exists(fullPath)) {
+      try {
+        Schematic schematic = SchematicLoader.load(fullPath);
+        SchematicManager.saveSchematicId(
+            source.getPosition(), schematicName, fullFileName, schematicName + ".test", Type);
+        source.sendFeedback(() -> Text.literal("Schematic loaded: " + schematicName), false);
+        source.sendFeedback(() -> Text.literal("Schematic size: " + schematic.length()), false);
+        schematic
+            .blocks()
+            .forEach(
+                pair -> {
+                  SchematicBlockPos schematicBlockPos = pair.left();
+                  BlockPos blockPos =
+                      new BlockPos(
+                          schematicBlockPos.x(), schematicBlockPos.y(), schematicBlockPos.z());
+                  SchematicBlock block = pair.right();
+                  Position playerPosition = source.getPosition();
+                  String blockName = block.name();
+                  BlockState blockState = BlockParser.parseBlockState(blockName);
+                  UUID id =
+                      Objects.requireNonNull(
+                              SchematicManager.schematicInfos.values().stream()
+                                  .filter(info -> info.fullFileName.equals(fullFileName))
+                                  .findFirst()
+                                  .orElse(null))
+                          .id;
 
-        if (Files.exists(fullPath)) {
-            try {
-                Schematic schematic = SchematicLoader.load(fullPath);
-                SchematicManager.saveSchematicId(source.getPosition(), schematicName, fullFileName, schematicName+".test", Type);
-                source.sendFeedback(() -> Text.literal("Schematic loaded: " + schematicName), false);
-                source.sendFeedback(() -> Text.literal("Schematic size: " + schematic.length()), false);
-                schematic.blocks().forEach(pair -> {
-                    SchematicBlockPos schematicBlockPos = pair.left();
-                    BlockPos blockPos = new BlockPos(schematicBlockPos.x(), schematicBlockPos.y(), schematicBlockPos.z());
-                    SchematicBlock block = pair.right();
-                    Position playerPosition = source.getPosition();
-                    String blockName = block.name();
-                    BlockState blockState = BlockParser.parseBlockState(blockName);
-                    UUID id = Objects.requireNonNull(SchematicManager.schematicInfos.values().stream()
-                            .filter(info -> info.fullFileName.equals(fullFileName))
-                            .findFirst()
-                            .orElse(null)).id;
-
-                    handler.handle(source.getWorld(), blockState, blockPos, playerPosition, id);
+                  handler.handle(
+                      Objects.requireNonNull(source.getPlayer()).getServerWorld(),
+                      blockState,
+                      blockPos,
+                      playerPosition,
+                      id);
                 });
-            } catch (ParsingException | IOException e) {
-                source.sendError(Text.literal("Failed to load schematic: " + e.getMessage()));
-                return 0;
-            }
-        } else {
-            source.sendError(Text.literal(fileType + " file not found: " + fullPath));
-            return 0;
-        }
-        return 1;
+      } catch (ParsingException | IOException e) {
+        source.sendError(Text.literal("Failed to load schematic: " + e.getMessage()));
+        return 0;
+      }
+    } else {
+      source.sendError(Text.literal(fileType + " file not found: " + fullPath));
+      return 0;
     }
+    return 1;
+  }
 
+  private static int executeBlock(CommandContext<ServerCommandSource> context) {
+    Type = true;
+    return executeWithHandler(context, BlockPlacer::handleBlock);
+  }
 
-    private static int executeBlock(CommandContext<ServerCommandSource> context) {
-        Type = true;
-        return executeWithHandler(context, BlockPlacer::handleBlock);
-    }
+  private static int executeBlockDisplay(CommandContext<ServerCommandSource> context) {
+    Type = false;
+    return executeWithHandler(context, BlockDisplayPlacer::handleBlock);
+  }
 
-    private static int executeBlockDisplay(CommandContext<ServerCommandSource> context) {
-        Type = false;
-        return executeWithHandler(context, BlockDisplayPlacer::handleBlock);
-    }
-
+  @FunctionalInterface
+  interface BlockHandler {
+    void handle(
+        ServerWorld source,
+        BlockState blockState,
+        BlockPos blockPos,
+        Position playerPosition,
+        UUID id);
+  }
 }

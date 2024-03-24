@@ -1,3 +1,5 @@
+import net.fabricmc.loom.api.RemapConfigurationSettings
+
 plugins {
     id 'fabric-loom' version '1.5-SNAPSHOT'
     id 'maven-publish'
@@ -11,13 +13,16 @@ base {
 }
 
 loom {
-    accessWidenerPath = file('src/main/resources/craftcore.accesswidener')
+
+
 }
+
+
 repositories {
-    mavenCentral()
     maven {url "https://maven.enginehub.org/repo/" }
     maven { url 'https://jitpack.io' }
 }
+
 
 dependencies {
     // To change the versions see the gradle.properties file
@@ -27,8 +32,8 @@ dependencies {
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    implementation 'net.sandrohc:schematic4j:1.1.0'
-    implementation 'com.github.Querz:NBT:6.1'
+    modImplementation 'net.sandrohc:schematic4j:1.1.0'
+    modImplementation 'com.github.Querz:NBT:6.1'
 
 }
 

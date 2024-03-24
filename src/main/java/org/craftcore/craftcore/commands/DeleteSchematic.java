@@ -18,6 +18,7 @@ import net.sandrohc.schematic4j.schematic.Schematic;
 import net.sandrohc.schematic4j.schematic.types.SchematicBlock;
 import net.sandrohc.schematic4j.schematic.types.SchematicBlockPos;
 import org.craftcore.craftcore.CraftCore;
+import org.craftcore.craftcore.core.Position.PositionToStringParser;
 import org.craftcore.craftcore.core.block.*;
 import org.craftcore.craftcore.core.shematic.SchematicManager;
 
@@ -55,7 +56,7 @@ public class DeleteSchematic {
         if (Files.exists(path)) {
             try{
                 Schematic schematic = SchematicLoader.load(path);
-                if (schematicInfo.type == true) {
+                if (schematicInfo.type) {
                     schematic.blocks().forEach(pair -> {
                         SchematicBlock schematicBlock = pair.right();
                         SchematicBlockPos pos = pair.left();
@@ -69,10 +70,11 @@ public class DeleteSchematic {
                         SchematicBlockPos pos = pair.left();
                         BlockState block = BlockParser.parseBlockState(schematicBlock.name());
                         BlockDisplayDeleter.handleBlock(source.getWorld(), block, new BlockPos(pos.x(), pos.y(), pos.z()), schematicInfo.position, schematicInfo.id);
+                        CraftCore.LOGGER.info(schematicInfo.customName + " " + schematicInfo.id + " " + PositionToStringParser.parsePosition(schematicInfo.position) + " " + new BlockPos(pos.x(), pos.y(), pos.z()) + " " + block);
                     });
 
                 }
-
+                SchematicManager.deleteSchematic(schematicInfo.id);
 
             } catch (IOException e) {
                 source.sendError(Text.literal("Error deleting schematic " + schematicCustomName));

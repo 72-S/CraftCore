@@ -1,18 +1,17 @@
 package org.craftcore.craftcore.core.shematic;
 
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.math.Position;
-import org.craftcore.craftcore.CraftCore;
-import org.craftcore.craftcore.core.Position.PositionToStringParser;
-import org.craftcore.craftcore.core.Position.StringToPositionParser;
-
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.math.Position;
+import org.craftcore.craftcore.CraftCore;
+import org.craftcore.craftcore.core.Position.StringToPositionParser;
 
 public class SchematicManager {
   public static final String SCHEMATIC_FOLDER_NAME = "schematics";
+  public static final Map<UUID, SchematicInfo> schematicInfos = new HashMap<>();
   private static final String ID_FILE_NAME = "schematicIds.txt";
   private static final String idFile =
       FabricLoader.getInstance()
@@ -20,26 +19,6 @@ public class SchematicManager {
           .resolve(SCHEMATIC_FOLDER_NAME)
           .resolve(ID_FILE_NAME)
           .toString();
-  public static final Map<UUID, SchematicInfo> schematicInfos = new HashMap<>();
-
-  public static class SchematicInfo {
-    public final String customName;
-    public final Position position;
-    public final String name;
-    public final String fullFileName;
-    public final UUID id;
-    public final Boolean type;
-
-    public SchematicInfo(
-        String customName, Position position, String name, String fullFileName, UUID id, Boolean type) {
-      this.customName = customName;
-      this.position = position;
-      this.name = name;
-      this.fullFileName = fullFileName;
-      this.id = id;
-      this.type = type;
-    }
-  }
 
   public static void initializeSchematicsFolder() {
     if (!FabricLoader.getInstance().getGameDir().resolve(SCHEMATIC_FOLDER_NAME).toFile().exists()) {
@@ -72,7 +51,12 @@ public class SchematicManager {
     loadToMap();
   }
 
-  public static void saveSchematicId(Position playerPosition, String schematicName, String fullFileName, String CustomName, Boolean Type) {
+  public static void saveSchematicId(
+      Position playerPosition,
+      String schematicName,
+      String fullFileName,
+      String CustomName,
+      Boolean Type) {
     UUID id = UUID.randomUUID();
     String pos = playerPosition.toString();
     schematicInfos.put(
@@ -80,7 +64,18 @@ public class SchematicManager {
     try {
       FileWriter fileWriter = new FileWriter(idFile, true);
       fileWriter.write(
-          CustomName + ";" + pos + ";" + schematicName + ";" + fullFileName + ";" + id + ";" + Type + "\n");
+          CustomName
+              + ";"
+              + pos
+              + ";"
+              + schematicName
+              + ";"
+              + fullFileName
+              + ";"
+              + id
+              + ";"
+              + Type
+              + "\n");
       fileWriter.close();
     } catch (IOException e) {
       e.printStackTrace();
@@ -91,30 +86,30 @@ public class SchematicManager {
     return schematicInfos.get(schematicId);
   }
 
-private static void loadToMap() {
+  private static void loadToMap() {
     try {
-        BufferedReader reader = new BufferedReader(new FileReader(idFile));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            String[] parts = line.split(";");
-            if (parts.length < 6) {
-                CraftCore.LOGGER.error("Invalid line in schematic IDs file: " + line);
-                continue;
-            }
-            String customName = parts[0];
-            Position position = StringToPositionParser.parsePosition(parts[1]);
-            String schematicName = parts[2];
-            String fullFileName = parts[3];
-            UUID id = UUID.fromString(parts[4]);
-            Boolean type = Boolean.parseBoolean(parts[5]);
-
-            schematicInfos.put(
-                id, new SchematicInfo(customName, position, schematicName, fullFileName, id, type));
+      BufferedReader reader = new BufferedReader(new FileReader(idFile));
+      String line;
+      while ((line = reader.readLine()) != null) {
+        String[] parts = line.split(";");
+        if (parts.length < 6) {
+          CraftCore.LOGGER.error("Invalid line in schematic IDs file: " + line);
+          continue;
         }
+        String customName = parts[0];
+        Position position = StringToPositionParser.parsePosition(parts[1]);
+        String schematicName = parts[2];
+        String fullFileName = parts[3];
+        UUID id = UUID.fromString(parts[4]);
+        Boolean type = Boolean.parseBoolean(parts[5]);
+
+        schematicInfos.put(
+            id, new SchematicInfo(customName, position, schematicName, fullFileName, id, type));
+      }
     } catch (IOException e) {
-        e.printStackTrace();
+      e.printStackTrace();
     }
-}
+  }
 
   public static void deleteSchematic(UUID id) {
     schematicInfos.remove(id);
@@ -141,4 +136,28 @@ private static void loadToMap() {
       e.printStackTrace();
     }
   }
+
+  public static class SchematicInfo {
+    public final String customName;
+    public final Position position;
+    public final String name;
+    public final String fullFileName;
+    public final UUID id;
+    public final Boolean type;
+
+    public SchematicInfo(
+        String customName,
+        Position position,
+        String name,
+        String fullFileName,
+        UUID id,
+        Boolean type) {
+      this.customName = customName;
+      this.position = position;
+      this.name = name;
+      this.fullFileName = fullFileName;
+      this.id = id;
+      this.type = type;
     }
+  }
+}

@@ -9,7 +9,7 @@
     "repo": "https://github.com/consti/CraftCore"
   },
   "license": "All-Rights-Reserved",
-  "icon": "../assets/icon.png",
+  "icon": "icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
@@ -26,6 +26,5 @@
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
     "minecraft": "${minecraft_version}"
-  },
-  "accessWidener": "craftcore.accesswidener"
+  }
 }
