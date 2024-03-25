@@ -18,10 +18,10 @@ public class ScreenButtonMixin extends Screen {
         super(title);
     }
 
-    @Inject(method = "init", at = @At("TAIL")) 
+    @Inject(method = "init", at = @At("TAIL"))
     private void addCustomButton(CallbackInfo ci) {
-        int xPosition = this.width / 2 + 90;
-        int yPosition = this.height / 2;
+        int xPosition = this.width / 2 + 5;
+        int yPosition = this.height / 6 + 12;
         ButtonWidget button = ButtonWidget.builder(Text.of("CraftCore Options"), buttonClick -> {
             this.client.setScreen(new SettingsScreen(this));
 
@@ -29,5 +29,6 @@ public class ScreenButtonMixin extends Screen {
                 .position(xPosition, yPosition)
                 .build();
 
-        this.addDrawableChild(button);
-}}
+        this.addDrawableChild(button);}
+
+}

@@ -34,7 +34,7 @@ protected void init(CallbackInfo info) {
     int yPosition = this.height / 2; // Platziert den Button direkt über dem "Destroy Items"-Button
     ButtonWidget button = ButtonWidget.builder(Text.of("S"), buttonClick -> {
         sortInventory();
-        buttonClick.active = false;
+        buttonClick.isHovered();
 
     })
     .position(xPosition, yPosition)

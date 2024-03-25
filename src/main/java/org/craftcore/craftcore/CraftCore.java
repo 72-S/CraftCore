@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import org.craftcore.craftcore.commands.DeleteSchematic;
 import org.craftcore.craftcore.commands.GetSchematic;
 import org.craftcore.craftcore.commands.LoadSchematic;
+import org.craftcore.craftcore.core.GUI.SettingsManager;
 import org.craftcore.craftcore.core.shematic.SchematicManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ public class CraftCore implements ModInitializer {
         LOGGER.info("CraftCore is initializing!");
         SchematicManager.initializeSchematicsFolder();
         registerCommands();
+        SettingsManager.loadSettings();
     }
 
     private void registerCommands() {
